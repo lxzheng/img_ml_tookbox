@@ -1,10 +1,10 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
+model_chose=''
 
 def display_learning_curves(history):
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
+    acc = history.history['acc']
+    val_acc = history.history['val_acc']
 
     loss = history.history['loss']
     val_loss = history.history['val_loss']
@@ -30,9 +30,17 @@ def display_learning_curves(history):
 
 
 def train_model(classes, train_generator, val_generator, epochs, img_shape=(224, 224, 3)):
-    base_model = tf.keras.applications.MobileNetV2(input_shape=img_shape,
-                                                   include_top=False,
-                                                   weights='imagenet')
+
+    if  model_chose =='mobilenetv2':                                              
+        base_model = tf.keras.applications.MobileNetV2(input_shape=img_shape,
+                                                    include_top=False,
+                                                    weights='imagenet')
+        print('使用的模型为mobilenetv2（适用于移动端模型）')  
+    if  model_chose =='inceptionv3':
+        base_model = tf.keras.applications.InceptionV3(input_shape=img_shape,
+                                                    include_top=False,
+                                                    weights='imagenet') 
+        print('使用的模型为inceptionv3（高精度模型）')                                                                                            
     # base_model.trainable = True
     base_model.trainable = False
     model = tf.keras.Sequential([
@@ -48,11 +56,14 @@ def train_model(classes, train_generator, val_generator, epochs, img_shape=(224,
     #    layer.trainable =  False
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-5),
                   loss='categorical_crossentropy',
-                  metrics=['accuracy'])
-    history = model.fit_generator(train_generator,
+                  metrics=['acc'])
+    history = model.fit(train_generator,
                                   epochs=epochs,
                                   validation_data=val_generator)
 
     model.save('my_model.h5')
 
+       
+    print('训练结束,标签已更新')
+    print(history.history)
     display_learning_curves(history)

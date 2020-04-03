@@ -29,15 +29,20 @@ def plot_images(images_arr, labels, label_names):
     plt.show()
 
 
-def load_data(data_dir, batch_size=4, img_size=(224, 224), validation_perc=0.10, data_aug=False):
-    if data_aug:
-        image_generator = ImageDataGenerator(rescale=1. / 255,
-                                             validation_split=validation_perc,
+def load_data(data_dir, batch_size=4, img_size=(224, 224), validation_perc=0.10, data_aug=False, 
                                              rotation_range=45,
                                              width_shift_range=.15,
                                              height_shift_range=.15,
                                              horizontal_flip=True,
-                                             zoom_range=0.5)
+                                             zoom_range=0.5):
+    if data_aug:
+        image_generator = ImageDataGenerator(rescale=1. / 255,
+                                             validation_split=validation_perc,
+                                             rotation_range=rotation_range,
+                                             width_shift_range=width_shift_range,
+                                             height_shift_range=height_shift_range,
+                                             horizontal_flip=horizontal_flip,
+                                             zoom_range=zoom_range)
     else:
         image_generator = ImageDataGenerator(rescale=1. / 255,
                                              validation_split=validation_perc)

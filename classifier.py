@@ -5,18 +5,15 @@ from typing import List, Any
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 from tensorflow.keras.models import load_model
-
+import cv2
 img = None  # type: Any
 
 
 def classification(model,image_input):
     img_size = model.get_layer(index=0).input_shape[1:3]
-
-    image = Image.open(io.BytesIO(image_input))
+    image = Image.open(io.BytesIO(image_input)).convert('RGB')
     image = np.array(image.resize(img_size, Image.NEAREST)) / 255.0
-
     result = model.predict(image[np.newaxis, ...])
-
     return result
 
 
@@ -25,7 +22,14 @@ def img_upload():
 
 
 def do_classification(label_names):
-    model = load_model('my_model.h5')
+    try:
+        model = load_model('my_model.h5')
+    except:
+        print("当前没有找到用来识别的数据模型，请先进行训练")
+        return
+    with open('label_names.dat', 'r') as f:
+        tempLabel=f.read()
+        label_names=tempLabel.split(' ')
     uploader = widgets.FileUpload(accept='image/*', description='上传待识别图像')
     cls_btn = widgets.Button(description='识别图像')
     display(widgets.VBox([uploader, cls_btn]))
@@ -36,7 +40,7 @@ def do_classification(label_names):
         display(widgets.VBox([uploader, cls_btn]))
         key = list(uploader.value.keys())[0]
         img = uploader.value[key]['content']
-        image = widgets.Image(value=img)
+        image = widgets.Image(value=img,width=150,height=150)
         display(image)
 
     uploader.observe(on_uploader_change, names='value')

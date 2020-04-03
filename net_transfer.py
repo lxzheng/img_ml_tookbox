@@ -14,9 +14,12 @@ def get_zip_file():
         if url_txt.value is None:
             print('请在文本框中输入下载链接')
         else:
-            wget.download(url_txt.value, out=file_name_txt.value)
-            print('下载完成')
-            file_name=file_name_txt.value
+            try:
+                wget.download(url_txt.value, out=file_name_txt.value)
+                print('下载完成')
+                file_name=file_name_txt.value
+            except:
+                print('请输入正常的URL连接')
 
     btn.on_click(btn_click)
     box = widgets.VBox([url_txt,file_name_txt, btn])
