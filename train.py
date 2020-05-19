@@ -1,5 +1,8 @@
+import os
 import tensorflow as tf
+import tensorflow_hub as hub
 import matplotlib.pyplot as plt
+
 model_chose=''
 
 def display_learning_curves(history):
@@ -36,21 +39,31 @@ def train_model(classes, train_generator, val_generator, epochs, img_shape=(224,
                                                     include_top=False,
                                                     weights='imagenet')
         print('使用的模型为mobilenetv2（适用于移动端模型）')  
+        
     if  model_chose =='inceptionv3':
         base_model = tf.keras.applications.InceptionV3(input_shape=img_shape,
                                                     include_top=False,
                                                     weights='imagenet') 
         print('使用的模型为inceptionv3（高精度模型）')                                                                                            
+    if 'efficientnet' in model_chose:
+        os.environ["TFHUB_CACHE_DIR"] = os.environ["HOME"]+'/.keras/tfhub_modules/'
+        feature_extractor_url='https://hub.tensorflow.google.cn/tensorflow/efficientnet/lite'+model_chose[-1]+'/feature-vector/2'
+        base_model = hub.KerasLayer(feature_extractor_url,
+                                         input_shape=img_shape)
+        print('使用的模型为'+model_chose) 
+        
     # base_model.trainable = True
     base_model.trainable = False
-    model = tf.keras.Sequential([
-        base_model,
+    model = tf.keras.Sequential()
+    model.add(base_model)
         # tf.keras.layers.Conv2D(32, 3, activation='relu'),
         # tf.keras.layers.Dropout(0.2),
-        # tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(classes, activation='softmax')
-    ])
+    if 'efficientnet' not in model_chose:
+        model.add(tf.keras.layers.GlobalAveragePooling2D())
+        #tf.keras.layers.Flatten(),
+    model.add(tf.keras.layers.Dense(classes, activation='softmax'))
+    
+    
     # fine_tune_at = 100
     # for layer in base_model.layers[:fine_tune_at]:
     #    layer.trainable =  False

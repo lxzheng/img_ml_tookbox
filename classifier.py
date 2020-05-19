@@ -5,6 +5,7 @@ from typing import List, Any
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 from tensorflow.keras.models import load_model
+from tensorflow_hub import KerasLayer
 import cv2
 img = None  # type: Any
 
@@ -23,7 +24,7 @@ def img_upload():
 
 def do_classification(label_names):
     try:
-        model = load_model('my_model.h5')
+        model = load_model('my_model.h5',custom_objects={'KerasLayer':KerasLayer})
     except:
         print("当前没有找到用来识别的数据模型，请先进行训练")
         return

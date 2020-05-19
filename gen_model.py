@@ -24,7 +24,11 @@ def do_model_train(data_dir):
         disabled=False,
         indent=False
     )
-    model_chose_tx = widgets.Dropdown(options=['mobilenetv2','inceptionv3'],description='训练模型选择')
+    model_options=['mobilenetv2',
+                   'efficientnet-lite0','efficientnet-lite1',
+                   'efficientnet-lite2','efficientnet-lite3',
+                   'efficientnet-lite4']
+    model_chose_tx = widgets.Dropdown(options=model_options,description='训练模型选择')
     batch_size_tx = widgets.IntText(value=4, description='批尺寸')
     epochs_tx = widgets.IntText(value=15, description='训练轮数')
 
@@ -45,7 +49,8 @@ def do_model_train(data_dir):
         if adv_ckbox.value:
             display(widgets.VBox([adv_ckbox,model_chose_tx,batch_size_tx,epochs_tx,validation_perc_tx,data_aug_ckbox]))
             if data_aug_ckbox.value:
-                display(widgets.VBox([rotation_range_tx,width_shift_range_tx,height_shift_range_tx,zoom_range_tx,horizontal_flip_tx]))
+                display(widgets.VBox([rotation_range_tx, 
+                                      width_shift_range_tx,height_shift_range_tx,zoom_range_tx,horizontal_flip_tx]))
             display(widgets.VBox([train_btn]))
         else:
             display(widgets.VBox([adv_ckbox, train_btn]))
@@ -53,9 +58,11 @@ def do_model_train(data_dir):
         clear_output()
         if data_aug_ckbox.value:
             display(widgets.VBox([adv_ckbox,model_chose_tx,batch_size_tx,epochs_tx,validation_perc_tx,data_aug_ckbox]))
-            display(widgets.VBox([rotation_range_tx,width_shift_range_tx,height_shift_range_tx,zoom_range_tx,horizontal_flip_tx,train_btn]))
+            display(widgets.VBox([rotation_range_tx,
+                                  width_shift_range_tx,height_shift_range_tx,zoom_range_tx,horizontal_flip_tx,train_btn]))
         else:
-             display(widgets.VBox([adv_ckbox,model_chose_tx,batch_size_tx,epochs_tx,validation_perc_tx,data_aug_ckbox,train_btn]))
+             display(widgets.VBox([adv_ckbox,model_chose_tx,batch_size_tx,epochs_tx,
+                                   validation_perc_tx,data_aug_ckbox,train_btn]))
     adv_ckbox.observe(on_adv_ckbox_change)
     data_aug_ckbox.observe(data_aug_ckbox_change)
 
@@ -74,9 +81,10 @@ def do_model_train(data_dir):
         zoom_range=0.5
         horizontal_flip=horizontal_flip_tx.value
         data_aug =data_aug_ckbox.value
+
         #验证输入数据的正确性
-        if model_chose_tx.value=='inceptionv3':
-            train.model_chose='inceptionv3'
+        if model_chose_tx.value in model_options:
+            train.model_chose=model_chose_tx.value
         if batch_size_tx.value > 0:
             batch_size = batch_size_tx.value
         if epochs_tx.value > 0:
