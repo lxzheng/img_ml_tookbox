@@ -58,6 +58,7 @@ def train_model(classes, train_generator, val_generator, epochs, img_shape=(224,
     model.add(base_model)
         # tf.keras.layers.Conv2D(32, 3, activation='relu'),
         # tf.keras.layers.Dropout(0.2),
+    # efficientnet用TF-HUB提取特征的模型,不需要使用GlobalAveragePooling2D
     if 'efficientnet' not in model_chose:
         model.add(tf.keras.layers.GlobalAveragePooling2D())
         #tf.keras.layers.Flatten(),
@@ -78,5 +79,5 @@ def train_model(classes, train_generator, val_generator, epochs, img_shape=(224,
 
        
     print('训练结束,标签已更新')
-    print(history.history)
+    #print(history.history)
     display_learning_curves(history)

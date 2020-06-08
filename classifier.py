@@ -22,15 +22,17 @@ def img_upload():
     display(uploader)
 
 
-def do_classification(label_names):
-    try:
-        model = load_model('my_model.h5',custom_objects={'KerasLayer':KerasLayer})
-    except:
-        print("当前没有找到用来识别的数据模型，请先进行训练")
-        return
-    with open('label_names.dat', 'r') as f:
-        tempLabel=f.read()
-        label_names=tempLabel.split(' ')
+def do_classification(model,label_names):
+    if model is None:
+        try:
+            model = load_model('my_model.h5',custom_objects={'KerasLayer':KerasLayer})
+        except:
+            print("当前没有找到用来识别的数据模型，请先进行训练")
+            return
+    if label_names is None:
+        with open('label_names.dat', 'r') as f:
+            tempLabel=f.read()
+            label_names=tempLabel.split(' ')
     uploader = widgets.FileUpload(accept='image/*', description='上传待识别图像')
     cls_btn = widgets.Button(description='识别图像')
     display(widgets.VBox([uploader, cls_btn]))

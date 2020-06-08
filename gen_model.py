@@ -14,10 +14,6 @@ label_names = []
 def do_model_train(data_dir):
     global model
     clear_output()
-    dataset_path = 'data/' + data_dir
-    if len(data_dir) == 0 or not os.path.exists(dataset_path):
-        print('数据集目录:' + data_dir + '不存在')
-        return
     adv_ckbox = widgets.Checkbox(
         value=False,
         description='高级选项',
@@ -99,6 +95,11 @@ def do_model_train(data_dir):
             height_shift_range=height_shift_range_tx.value
         if zoom_range_tx.value>0 :
             zoom_range=zoom_range_tx.value
+        dataset_path = 'data/' + data_dir[0]
+        if len(data_dir[0]) == 0 or not os.path.exists(dataset_path):
+            print('数据集目录:' + data_dir[0] + '不存在')
+            return
+
         train_generator, val_generator, classes, label_names = load_data(data_dir=dataset_path,
                                                                          batch_size=batch_size,
                                                                          validation_perc=validation_perc,
@@ -114,4 +115,6 @@ def do_model_train(data_dir):
         with open('label_names.dat', 'w') as f:
             for i in range(len(label_names)):
                 f.write(label_names[i]+' ')
+
+
     train_btn.on_click(on_train_btn_click)

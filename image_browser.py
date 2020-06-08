@@ -9,38 +9,50 @@ from matplotlib.pyplot import figure, imshow, subplot, imread
 index, del_index, imgs_count = 0, 0, 0
 imgs = []
 
-current_dataset_dir = ''
-
+current_dataset_dir = ['']
 
 def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
     global index, del_index, imgs_count, imgs, current_dataset_dir
     n, m = grid_size[0], grid_size[1]  # 图像grid布局
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-    dataset_dirs = [f for f in os.listdir(data_dir) if not f.startswith('.') and os.path.isdir(data_dir + '/' + f)]
+
     dir_chooser = widgets.Dropdown(
-        options=dataset_dirs,
         description='数据集目录')
+        
+    try:
+        dataset_dirs = [f for f in os.listdir(data_dir) if 
+                        (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
+        dir_chooser.options=dataset_dirs
+    except:
+        dataset_dirs = []
+        
     if len(dataset_dirs) > 0:
         dir_chooser.value = dataset_dirs[0]
         dir_chooser.disabled = False
     else:
         dir_chooser.disabled = True
-    if len(dir_chooser.value):
-        current_dataset_dir = dir_chooser.value
-        refresh_btn = widgets.Button(description='刷新')
+    if dir_chooser.value:
+        current_dataset_dir[0] = dir_chooser.value
+
+    refresh_btn = widgets.Button(description='刷新')
 
     def refresh_btn_click(sender):
         global current_dataset_dir
-        dataset_dirs = [f for f in os.listdir(data_dir) if
-                        (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
+        try:
+            dataset_dirs = [f for f in os.listdir(data_dir) if
+                            (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
+        except:
+            dataset_dirs = []
         dir_chooser.options = dataset_dirs
         if len(dataset_dirs) > 0:
             dir_chooser.value = dataset_dirs[0]
             dir_chooser.disabled = False
+            current_dataset_dir[0] = dir_chooser.value
         else:
             dir_chooser.disabled = True
-        current_dataset_dir = dir_chooser.value
+            current_dataset_dir[0] = ''
+        
 
     refresh_btn.on_click(refresh_btn_click)
     box = widgets.Box([dir_chooser, refresh_btn])
@@ -50,8 +62,11 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
     if dir_chooser.value is None:
         classes_names = []
     else:
-        classes_names = [f for f in os.listdir(data_dir + '/' + dir_chooser.value) if
+        try:
+            classes_names = [f for f in os.listdir(data_dir + '/' + dir_chooser.value) if
                          os.path.isdir(data_dir + '/' + dir_chooser.value + '/' + f)]
+        except:
+            classes_names = []
     classes_chooser = widgets.Dropdown(
         options=classes_names,
         description='类别:',
@@ -68,7 +83,10 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
     if classes_chooser.value is None:
         imgs = []
     else:
-        imgs = os.listdir(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value)
+        try:
+            imgs = os.listdir(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value)
+        except:
+            imgs=[]
     imgs_count = len(imgs)
 
     grid = GridspecLayout(n, m)
@@ -139,12 +157,18 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
 
     def on_del_bt_clicked(b):
         global imgs, imgs_count, index, del_index
-        for i in range(m * n):
-            if del_ckbxs[i].value:
-                del_ckbxs[i].value = False
-                os.remove(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value + '/' + imgs[del_index + i])
-                images[i].value = bytes()
-        imgs = os.listdir(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value)
+        try:
+            for i in range(m * n):
+                if del_ckbxs[i].value:
+                    del_ckbxs[i].value = False
+                    os.remove(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value + '/' + imgs[del_index + i])
+                    images[i].value = bytes()
+        except:
+            print('删除错误')
+        try:
+            imgs = os.listdir(data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value)
+        except:
+            imgs = []
         imgs_count = len(imgs)
         index = del_index
         on_next_bt_clicked(next_bt)
@@ -156,7 +180,7 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         if change['type'] == 'change' and change['name'] == 'value':
             imgs = []
 
-            if not classes_chooser.value is None:
+            if classes_chooser.value:
                 img_dir = data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value
                 if os.path.isdir(img_dir):
                     imgs = os.listdir(img_dir)
@@ -170,12 +194,17 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
     def on_dir_change(change):
         global imgs, imgs_count, index, current_dataset_dir
 
-        current_dataset_dir = dir_chooser.value
         if dir_chooser.value is None:
             classes_names = []
+            current_dataset_dir[0]= ''
         else:
-            classes_names = [f for f in os.listdir(data_dir + '/' + dir_chooser.value) if
+            try:
+                classes_names = [f for f in os.listdir(data_dir + '/' + dir_chooser.value) if
                              os.path.isdir(data_dir + '/' + dir_chooser.value + '/' + f)]
+            except:
+                classes_names = []
+                
+            current_dataset_dir[0] = dir_chooser.value
 
         classes_chooser.options = classes_names
         if len(classes_names) > 0:
@@ -184,4 +213,4 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         else:
             classes_chooser.disabled = True
 
-    dir_chooser.observe(on_dir_change)
+    dir_chooser.observe(on_dir_change,names='value')

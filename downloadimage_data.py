@@ -21,8 +21,8 @@ import os
 import platform
 system = platform.system()
 if system == "Linux":
-    os.environ['PATH']='/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-    os.environ['PATH']=os.environ['PATH']+':/home/jovyan/home/lab1/image_classification/bin/'
+    #os.environ['PATH']='/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+    os.environ['PATH']=os.environ['PATH']+':'+os.getcwd()+'/bin/'
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Proxy-Connection": "keep-alive",
@@ -360,25 +360,25 @@ def crawl_image_urls(keywords, engine="Google", max_number=10000,
     return image_urls[0:output_num]
 
 def get_image():
-    print('请输入要下载的数据集信息（注意如果要一次性下载多多种类型的图片,关键字之间用分号;隔开）')
-    date_name_tx = widgets.Text(description='数据集名称',value='')
+    print('请输入要爬取的数据集信息（注意如果要一次性爬取多个类别的图片,关键字之间用分号;隔开）')
+    data_name_tx = widgets.Text(description='数据集名称',value='')
     file_name_tx = widgets.Text(description='图片类别',value='')
     engine_chose_tx = widgets.Dropdown(options=["Baidu","Bing","Google"],description='搜索引擎选择')
     maxNumer_tx= widgets.IntText( description='每类图片数量',value=100)
-    btn = widgets.Button(description='下载')
+    btn = widgets.Button(description='爬取')
     def btn_click(sender):
-        if  date_name_tx.value  =='' :
-            print('请输入要下载的数据集名字')
+        if  data_name_tx.value  =='' :
+            print('请输入要爬取的数据集名字')
         elif file_name_tx.value  =='' :
-             print('请输入要下载的图片关键字')
+             print('请输入要爬取的图片关键字')
         else :
-            date_dir='./data/'+date_name_tx.value+'/'
+            data_dir='./data/'+data_name_tx.value+'/'
             tempStr=file_name_tx.value.replace('；',';')
             file_name=tempStr.split(';')
             #先创建文件夹
             for i in range(len(file_name)):
                 try:
-                    temp_dir=date_dir+file_name[i]
+                    temp_dir=data_dir+file_name[i]
                     os.makedirs(temp_dir)#创建文件夹
                 except:
                     print(temp_dir+'文件夹已经创建')
@@ -386,7 +386,7 @@ def get_image():
             #开始下载
             for i in range(len(file_name)):
                 temp_file_name=file_name[i]
-                temp_dir=date_dir+file_name[i]
+                temp_dir=data_dir+file_name[i]
                 crawled_urls = crawl_image_urls(keywords=temp_file_name,engine=engine_chose_tx.value, max_number=maxNumer_tx.value)
                 download_images(image_urls=crawled_urls, dst_dir=(temp_dir+'/'))
                 #从网络上下载的很多图片都是损坏的要删除他们的piexif信息
@@ -398,13 +398,13 @@ def get_image():
                         except:
                             print('save img error', fname)
                 clear_output()
-                print(file_name[i]+'下载结束')
+                print(file_name[i]+'爬取结束')
             clear_output()
-            box = widgets.VBox([date_name_tx,file_name_tx,engine_chose_tx, maxNumer_tx,btn])
+            box = widgets.VBox([data_name_tx,file_name_tx,engine_chose_tx, maxNumer_tx,btn])
             display(box)
-            print('下载结束')
+            print('爬取结束')
 
     btn.on_click(btn_click)
-    box = widgets.VBox([date_name_tx,file_name_tx,engine_chose_tx, maxNumer_tx,btn])
+    box = widgets.VBox([data_name_tx,file_name_tx,engine_chose_tx, maxNumer_tx,btn])
     display(box)
     
