@@ -3,6 +3,8 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import matplotlib.pyplot as plt
 
+tf.get_logger().setLevel('ERROR')
+
 model_chose=''
 
 def display_learning_curves(history):

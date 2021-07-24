@@ -54,7 +54,7 @@ def download_image(image_url, dst_dir, file_name, timeout=20, proxy_type=None, p
             response.close()
             file_type = imghdr.what(file_path)
             # if file_type is not None:
-            if file_type in ["jpg", "jpeg","bmp"]:
+            if file_type in ["jpg", "jpeg","bmp","png"]:
                 new_file_name = "{}.{}".format(file_name, file_type)
                 new_file_path = os.path.join(dst_dir, new_file_name)
                 shutil.move(file_path, new_file_path)
@@ -233,7 +233,13 @@ def baidu_get_image_url_using_api(keywords, max_number=10000, face_only=False,
         proxies = {"http": "{}://{}".format(proxy_type, proxy),
                    "https": "{}://{}".format(proxy_type, proxy)}
 
-    res = requests.get(init_url, proxies=proxies)
+    headers = {
+        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',#此条少了就会"Forbid spider access"
+        'Connection': 'keep-alive',
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0',#此条少了就会"Forbid spider access"
+        'Upgrade-Insecure-Requests': '1'
+    }
+    res = requests.get(init_url,headers=headers, proxies=proxies)
     init_json = json.loads(res.text.replace(r"\'", ""), encoding='utf-8', strict=False)
     total_num = init_json['listNum']
 
@@ -253,7 +259,7 @@ def baidu_get_image_url_using_api(keywords, max_number=10000, face_only=False,
             try_time = 0
             while True:
                 try:
-                    response = requests.get(url, proxies=proxies)
+                    response = requests.get(url, headers=headers, proxies=proxies)
                     break
                 except Exception as e:
                     try_time += 1
@@ -267,7 +273,6 @@ def baidu_get_image_url_using_api(keywords, max_number=10000, face_only=False,
                     image_urls.append(decode_url(data['objURL']))
                 elif 'replaceUrl' in data.keys() and len(data['replaceUrl']) == 2:
                     image_urls.append(data['replaceUrl'][1]['ObjURL'])
-
             return image_urls
 
         for i in range(0, int((crawl_num + batch_size - 1) / batch_size)):

@@ -36,27 +36,7 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         current_dataset_dir[0] = dir_chooser.value
 
     refresh_btn = widgets.Button(description='刷新')
-
-    def refresh_btn_click(sender):
-        global current_dataset_dir
-        try:
-            dataset_dirs = [f for f in os.listdir(data_dir) if
-                            (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
-        except:
-            dataset_dirs = []
-        dir_chooser.options = dataset_dirs
-        if len(dataset_dirs) > 0:
-            dir_chooser.value = dataset_dirs[0]
-            dir_chooser.disabled = False
-            current_dataset_dir[0] = dir_chooser.value
-        else:
-            dir_chooser.disabled = True
-            current_dataset_dir[0] = ''
-        
-
-    refresh_btn.on_click(refresh_btn_click)
     box = widgets.Box([dir_chooser, refresh_btn])
-
     display(box)
 
     if dir_chooser.value is None:
@@ -214,3 +194,23 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
             classes_chooser.disabled = True
 
     dir_chooser.observe(on_dir_change,names='value')
+
+
+    def refresh_btn_click(sender):
+        global current_dataset_dir
+        try:
+            dataset_dirs = [f for f in os.listdir(data_dir) if
+                            (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
+        except:
+            dataset_dirs = []
+        dir_chooser.options = dataset_dirs
+        if len(dataset_dirs) > 0:
+            dir_chooser.value = dataset_dirs[0]
+            dir_chooser.disabled = False
+            current_dataset_dir[0] = dir_chooser.value
+        else:
+            dir_chooser.disabled = True
+            current_dataset_dir[0] = ''
+        on_dir_change(dir_chooser)
+
+    refresh_btn.on_click(refresh_btn_click)

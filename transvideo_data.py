@@ -25,7 +25,7 @@ def get_video_info(file_name):
             sys.exit(1)
         return int(video_stream['nb_frames'])
     except ffmpeg.Error as err:
-        print(str(err.stderr, encoding='utf8'))
+        print('error:'+str(err.stderr, encoding='utf8'))
         sys.exit(1)
     return   int(video_stream['nb_frames'])
 
@@ -43,7 +43,7 @@ def trans_video_to_jpeg(dataset_name, file_name, label_name, interval):#视频�
         print('该标签文件夹已经创建')  
     for i in range(1,total_jpeg):
         out=read_time_as_jpeg(file_name,i*interval)
-        file = open(data_dir+'/'+str(i)+'.jpg','wb')
+        file = open(data_dir+'/'+file_name+'_'+str(i)+'.jpg','wb')
         file.write(out)
         file.close()
         print('当前进度'+str(i)+'/'+str(total_jpeg))
@@ -97,6 +97,7 @@ def get_Video(data_dir='data'):
                 trans_video_to_jpeg(str(dataset_name.value),str(video_file_chooser.value),str(label_name_txt.value),interval_txt.value)
                 print('视频转换完成') 
             except Exception as result:
+                print('error:转换失败 '+str(dataset_name.value)+' '+str(video_file_chooser.value)+' ' +str(label_name_txt.value)+' ' +str(interval_txt.value))
                 print(result)
     btn.on_click(btn_click)
     box = widgets.VBox([dataset_name,label_name_txt,video_file_chooser,interval_txt,btn])
