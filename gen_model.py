@@ -20,7 +20,7 @@ def do_model_train(data_dir):
         disabled=False,
         indent=False
     )
-    model_options=['mobilenetv2',
+    model_options=['mobilenetv2','inceptionv3',
                    'efficientnet-lite0','efficientnet-lite1',
                    'efficientnet-lite2','efficientnet-lite3',
                    'efficientnet-lite4']
