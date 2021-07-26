@@ -29,7 +29,8 @@ def do_classification(model,label_names):
         except:
             print("当前没有找到用来识别的数据模型，请先进行训练")
             return
-    if label_names is None:
+    
+    if (label_names is None) or len(label_names)<=0:
         with open('label_names.dat', 'r') as f:
             tempLabel=f.read()
             label_names=tempLabel.split(' ')
@@ -41,17 +42,25 @@ def do_classification(model,label_names):
         global img
         clear_output()
         display(widgets.VBox([uploader, cls_btn]))
-        key = list(uploader.value.keys())[0]
-        img = uploader.value[key]['content']
-        image = widgets.Image(value=img,width=150,height=150)
+        keys = list(uploader.value.keys())
+        if len(keys)>0:
+            img = uploader.value[keys[0]]['content']
+            image = widgets.Image(value=img,width=150,height=150)
         display(image)
+
 
     uploader.observe(on_uploader_change, names='value')
 
     def on_cls_btn_click(b):
-        on_uploader_change(uploader)
-        print('开始图像识别')
-        result = classification(model,img)
-        print('识别结果：' + label_names[np.argmax(result)])
+        #on_uploader_change(uploader)
+        uploader.value.clear()
+        uploader._counter = 0
+        if img:
+            print('开始图像识别')
+            result = classification(model,img)
+            print('识别结果：' + label_names[np.argmax(result)])
+        else:
+            print('请先上传图像')
+            
 
     cls_btn.on_click(on_cls_btn_click)
