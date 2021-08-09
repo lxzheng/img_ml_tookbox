@@ -58,7 +58,7 @@ def do_classification(model,label_names):
         if img:
             print('开始图像识别')
             result = classification(model,img)
-            print('识别结果：' + label_names[np.argmax(result)])
+            print('识别结果：' + label_names[np.argmax(result)]+',概率：'+str(result[0][np.argmax(result)]))
         else:
             print('请先上传图像')
             

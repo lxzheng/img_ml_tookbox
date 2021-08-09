@@ -22,7 +22,7 @@ def prepare_data():
         disabled=False,
         value='网络下载'
     )
-    out = widgets.Output(layout={'border': '1px solid black','height':"360px"})
+    out = widgets.Output(layout={'border': '1px solid black','height':"400px"})
 
     def on_get_data_option_change(b):
         with out:

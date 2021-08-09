@@ -99,7 +99,7 @@ def do_model_train(data_dir):
         if len(data_dir[0]) == 0 or not os.path.exists(dataset_path):
             print('数据集目录:' + data_dir[0] + '不存在')
             return
-
+        print(horizontal_flip)
         train_generator, val_generator, classes, label_names = load_data(data_dir=dataset_path,
                                                                          batch_size=batch_size,
                                                                          validation_perc=validation_perc,

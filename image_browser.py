@@ -22,7 +22,8 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         
     try:
         dataset_dirs = [f for f in os.listdir(data_dir) if 
-                        (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f)]
+                        (not f.startswith('.')) and os.path.isdir(data_dir + '/' + f) 
+                         and not f.endswith('video')]
         dir_chooser.options=dataset_dirs
     except:
         dataset_dirs = []
@@ -37,6 +38,7 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
 
     refresh_btn = widgets.Button(description='刷新')
     box = widgets.Box([dir_chooser, refresh_btn])
+    print('所选的数据集将被用于模型训练')
     display(box)
 
     if dir_chooser.value is None:
@@ -68,7 +70,7 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         except:
             imgs=[]
     imgs_count = len(imgs)
-
+    imgs.sort
     grid = GridspecLayout(n, m)
     next_bt = widgets.Button(description="下一页")
     display(next_bt)
@@ -101,7 +103,6 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
             del_bt.disabled = False
         if imgs_count > m * n:
             next_bt.disabled = False
-        imgs.sort()
         for i in range(n):
             for j in range(m):
                 if i * m + j + index >= imgs_count:
@@ -150,24 +151,30 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
         except:
             imgs = []
         imgs_count = len(imgs)
+        imgs.sort()
         index = del_index
         on_next_bt_clicked(next_bt)
 
     del_bt.on_click(on_del_bt_clicked)
 
+    def update_imgs():
+        global imgs, imgs_count, index
+        imgs = []
+
+        if classes_chooser.value:
+            img_dir = data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value
+            if os.path.isdir(img_dir):
+                imgs = os.listdir(img_dir)
+        imgs_count = len(imgs)
+        imgs.sort
+        index = 0
+
+        on_next_bt_clicked(next_bt)
+
     def on_classes_change(change):
         global imgs, imgs_count, index
         if change['type'] == 'change' and change['name'] == 'value':
-            imgs = []
-
-            if classes_chooser.value:
-                img_dir = data_dir + '/' + dir_chooser.value + '/' + classes_chooser.value
-                if os.path.isdir(img_dir):
-                    imgs = os.listdir(img_dir)
-            imgs_count = len(imgs)
-            index = 0
-
-            on_next_bt_clicked(next_bt)
+            update_imgs()
 
     classes_chooser.observe(on_classes_change)
 
@@ -185,10 +192,15 @@ def display_images(data_dir='data', grid_size=(2, 2), img_disp_size=(100, 100)):
                 classes_names = []
                 
             current_dataset_dir[0] = dir_chooser.value
+        
+        old_chooser=classes_chooser.value
 
         classes_chooser.options = classes_names
         if len(classes_names) > 0:
-            classes_chooser.value = classes_names[0]
+            if old_chooser==classes_names[0]:
+                update_imgs()
+            else:
+                classes_chooser.value = classes_names[0]
             classes_chooser.disabled = False
         else:
             classes_chooser.disabled = True

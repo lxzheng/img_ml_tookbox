@@ -2,11 +2,13 @@ import os
 import ffmpeg
 import numpy
 import ipywidgets as widgets  # 控件库
+from IPython.display import display, clear_output
 import piexif
 
 data_base_dir='./data/'
+video_dir=data_base_dir+'video/'
 
-#from IPython.display import display, clear_output
+output = widgets.Output(layout={'height':"40px"})
 #  获取视频的指定时间画面
 def read_time_as_jpeg(file_name, time):
     out, err = (
@@ -21,11 +23,15 @@ def get_video_info(file_name):
         probe = ffmpeg.probe(file_name)
         video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
         if video_stream is None:
-            print('找不到视频', file=sys.stderr)
+            with output:
+                clear_output()
+                print('找不到视频', file=sys.stderr)
             sys.exit(1)
         return int(video_stream['nb_frames'])
     except ffmpeg.Error as err:
-        print('error:'+str(err.stderr, encoding='utf8'))
+        with output:
+            clear_output()
+            print('error:'+str(err.stderr, encoding='utf8'))
         sys.exit(1)
     return   int(video_stream['nb_frames'])
 
@@ -35,23 +41,29 @@ def trans_video_to_jpeg(dataset_name, file_name, label_name, interval):#视频�
     try:
         os.makedirs(data_dir)#创建文件夹
     except:
-        print('该数据集文件夹已经创建')  
+        with output:
+            clear_output()
+            print('该数据集文件夹已经创建')  
     data_dir = data_base_dir + dataset_name + '/' + label_name
     try:
         os.makedirs(data_dir)#创建文件夹
     except:
-        print('该标签文件夹已经创建')  
+        with output:
+            clear_output()
+            print('该标签文件夹已经创建')  
     for i in range(1,total_jpeg):
         out=read_time_as_jpeg(file_name,i*interval)
-        file = open(data_dir+'/'+file_name+'_'+str(i)+'.jpg','wb')
+        file = open(data_dir+'/'+os.path.split(file_name)[-1]+'_'+str(i)+'.jpg','wb')
         file.write(out)
         file.close()
-        print('当前进度'+str(i)+'/'+str(total_jpeg))
+        with output:
+            clear_output()
+            print('当前进度'+str(i)+'/'+str(total_jpeg))
 def get_video_file_list():
-    files = os.listdir()
+    files = os.listdir(video_dir)
     video_files = []
     for file in files:
-        if file.lower().endswith('.mp4'):
+        if file.lower().endswith(('.mp4','.mov')):
             video_files.append(file)
     return video_files
 def get_Video(data_dir='data'):
@@ -66,10 +78,10 @@ def get_Video(data_dir='data'):
     )
 
 
-    print('请输入数据集名称、要保存的标签名、选择需转换成图像的视频文件和转换间隔，点击“转换”按键将把视频转换成数据集')
+    print('请输入数据集名称、要保存的标签名、选择需转换成图像的视频文件(mp4或mov格式)和转换间隔，点击“转换”按键将把视频转换成数据集')
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-    dataset_dirs = [f for f in os.listdir(data_dir) if not f.startswith('.') and os.path.isdir(data_dir + '/' + f)]
+    dataset_dirs = [f for f in os.listdir(data_dir) if not f.startswith('.') and os.path.isdir(data_dir + '/' + f) and not f.endswith('video')]
 
 
     dataset_name=widgets.Combobox(
@@ -81,27 +93,43 @@ def get_Video(data_dir='data'):
           disabled=False
     )
     label_name_txt = widgets.Text(description='类别',value='')
-    interval_txt= widgets.IntText( description='间隔时间(秒)',value=1)
+    interval_txt= widgets.FloatText( description='间隔时间(秒)',value=1)
     btn = widgets.Button(description='转换')
     if len(video_files) > 0:
         video_file_chooser.value = video_files[0]
 
 
     def btn_click(sender):
-        if label_name_txt.value =='' :
-            print('请在文本框中输入标签名')
-        elif  interval_txt.value is None :
-            print('请在文本框中输入抽取图像时间间隔')
+        if dataset_name.value == '':
+            with output:
+                clear_output()
+                print('请选择或输入数据集名称')
+        elif label_name_txt.value =='' :
+            with output:
+                clear_output()
+                print('请在文本框中输入标签名')
+        elif  (interval_txt.value is None) or interval_txt.value<0:
+            with output:
+                clear_output()
+                print('请在文本框中输入抽取图像时间间隔')
         else:
             try:
-                trans_video_to_jpeg(str(dataset_name.value),str(video_file_chooser.value),str(label_name_txt.value),interval_txt.value)
-                print('视频转换完成') 
+                video_file=video_file_chooser.value
+                if os.path.exists(video_dir+video_file):
+                    video_file=video_dir+video_file
+                trans_video_to_jpeg(str(dataset_name.value),video_file,str(label_name_txt.value),interval_txt.value)
+                with output:
+                    clear_output()
+                    print('视频转换完成') 
             except Exception as result:
-                print('error:转换失败 '+str(dataset_name.value)+' '+str(video_file_chooser.value)+' ' +str(label_name_txt.value)+' ' +str(interval_txt.value))
-                print(result)
+                with output:
+                    clear_output()
+                    print('error:转换失败 '+str(dataset_name.value)+' '+str(video_file_chooser.value)+' ' +str(label_name_txt.value)+' ' +str(interval_txt.value))
+                    print(result)
     btn.on_click(btn_click)
     box = widgets.VBox([dataset_name,label_name_txt,video_file_chooser,interval_txt,btn])
     display(box)
+    display(output)
 
     
 
