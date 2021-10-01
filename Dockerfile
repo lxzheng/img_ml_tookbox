@@ -54,8 +54,10 @@ RUN pip3 --no-cache-dir install \
 	jupyter-tensorboard\
 	-i https://pypi.tuna.tsinghua.edu.cn/simple/ \
 	--trusted-host https://pypi.tuna.tsinghua.edu.cn/simple/
+
+RUN python -c "from notebook.auth import passwd;print('c.NotebookApp.password = u'+'\''+passwd('xmu_atr')+'\'')"  >/root/.jupyter/jupyter_notebook_config.py
 RUN jupyter tensorboard enable --user
 RUN rm -rf /tf
-COPY src /tf
-#RUN echo "c.NotebookApp.password = u'argon2:$argon2id$v=19$m=10240,t=10,p=8$PCGJeCeDz3Q5jB4HgrGo/w$7lqhswj8Ttvb2jdXMcFYUw'" >/root/.jupyter/jupyter_notebook_config.py
-RUN python -c "from notebook.auth import passwd;print('c.NotebookApp.password = u'+'\''+passwd('xmu_atr')+'\'')"  >/root/.jupyter/jupyter_notebook_config.py
+COPY src README.md LICENSE /img_ml_toolbox/
+CMD ["bash","-c", \
+     "source /etc/bash.bashrc && jupyter notebook --notebook-dir=/img_ml_toolbox --ip 0.0.0.0 --no-browser --allow-root"   ]

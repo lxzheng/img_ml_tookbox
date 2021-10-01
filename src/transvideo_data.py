@@ -68,6 +68,8 @@ def get_video_file_list():
     return video_files
 def get_Video(data_dir='data'):
       # text = widgets.Text(value=videofile)
+    if not os.path.exists(video_dir):
+        os.makedirs(video_dir)
     video_files=get_video_file_list()
     video_file_chooser = widgets.Combobox(
         options=video_files,
