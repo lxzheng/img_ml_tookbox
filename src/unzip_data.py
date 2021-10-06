@@ -17,6 +17,7 @@ def unzip_data(zipfile, to_path):
         os.makedirs(to_path)
         # print('make dir:'+ to_path)
     if os.path.exists(zipfile):
+        # todo:应使用flietyp判断文件类型
         if zipfile.lower().endswith('.zip'):
             zf = ZipFile(zipfile, 'r')
             name_list=zf.namelist()

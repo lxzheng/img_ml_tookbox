@@ -401,7 +401,7 @@ def get_image():
                         try:
                             piexif.remove(os.path.join(root, f))
                         except:
-                            print('save img error', fname)
+                            print('save img error', f)
                 clear_output()
                 print(file_name[i]+'爬取结束')
             clear_output()
